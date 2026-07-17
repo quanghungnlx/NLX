@@ -1,0 +1,6 @@
+{
+  "name": "Biomax Boiler Maintenance",
+  "description": "App quản lý và bảo trì thiết bị lò hơi Biomax, hỗ trợ thuật toán cảnh báo, checklist và xử lý sự cố.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
