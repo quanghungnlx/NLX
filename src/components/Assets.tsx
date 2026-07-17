@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, QrCode, Save, FileText, ChevronDown, ChevronRight, Camera } from 'lucide-react';
+import { Layers, QrCode, Save, FileText, ChevronDown, ChevronRight, Camera, X } from 'lucide-react';
 
 export default function Assets() {
   const [checkerName, setCheckerName] = useState<string>('');
@@ -7,6 +7,7 @@ export default function Assets() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['1 - BẢN THỂ NỒI HƠI']));
   const [itemStatuses, setItemStatuses] = useState<Record<string, 'Hoạt động' | 'Bất thường'>>({});
   const [itemNotes, setItemNotes] = useState<Record<string, string>>({});
+  const [itemPhotos, setItemPhotos] = useState<Record<string, string>>({});
 
   const handleStatusChange = (itemKey: string, status: 'Hoạt động' | 'Bất thường') => {
     setItemStatuses(prev => ({ ...prev, [itemKey]: status }));
@@ -14,6 +15,19 @@ export default function Assets() {
 
   const handleNoteChange = (itemKey: string, note: string) => {
     setItemNotes(prev => ({ ...prev, [itemKey]: note }));
+  };
+
+  const handlePhotoChange = (itemKey: string, file: File | null) => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setItemPhotos(prev => ({ ...prev, [itemKey]: url }));
+    } else {
+      setItemPhotos(prev => {
+        const next = { ...prev };
+        delete next[itemKey];
+        return next;
+      });
+    }
   };
 
   const toggleCategory = (categoryName: string) => {
@@ -427,18 +441,38 @@ export default function Assets() {
                       {status === 'Bất thường' && (
                         <tr className="border-b border-slate-50 bg-red-50/10">
                           <td colSpan={3} className="p-4 pl-16">
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-                              <input 
-                                type="text"
-                                placeholder={`Ghi chú sự cố cho ${subItem}...`}
-                                value={itemNotes[itemKey] || ''}
-                                onChange={(e) => handleNoteChange(itemKey, e.target.value)}
-                                className="flex-1 text-sm border border-red-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg px-3 py-2 w-full md:w-auto"
-                              />
-                              <button className="flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full md:w-auto whitespace-nowrap">
-                                <Camera className="w-4 h-4" />
-                                Chụp ảnh báo cáo
-                              </button>
+                            <div className="flex flex-col gap-3">
+                              <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+                                <input 
+                                  type="text"
+                                  placeholder={`Ghi chú sự cố cho ${subItem}...`}
+                                  value={itemNotes[itemKey] || ''}
+                                  onChange={(e) => handleNoteChange(itemKey, e.target.value)}
+                                  className="flex-1 text-sm border border-red-200 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 rounded-lg px-3 py-2 w-full md:w-auto"
+                                />
+                                <label className="flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full md:w-auto whitespace-nowrap cursor-pointer">
+                                  <Camera className="w-4 h-4" />
+                                  Chụp ảnh báo cáo
+                                  <input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={(e) => handlePhotoChange(itemKey, e.target.files?.[0] || null)}
+                                  />
+                                </label>
+                              </div>
+                              {itemPhotos[itemKey] && (
+                                <div className="relative inline-block w-32 h-32 rounded-lg overflow-hidden border border-red-200 shadow-sm mt-2">
+                                  <img src={itemPhotos[itemKey]} alt="Report" className="w-full h-full object-cover" />
+                                  <button 
+                                    onClick={() => handlePhotoChange(itemKey, null)}
+                                    className="absolute top-1 right-1 bg-white/80 hover:bg-white text-red-600 rounded-full p-1 transition-colors"
+                                    title="Xóa ảnh"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </tr>
